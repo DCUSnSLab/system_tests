@@ -27,6 +27,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/executors.hpp"
 
+#include "test_rclcpp/rcl_broker.hpp"
 #include "test_rclcpp/utils.hpp"
 #include "test_rclcpp/msg/u_int32.hpp"
 #include "test_rclcpp/srv/add_two_ints.hpp"
@@ -72,7 +73,11 @@ static inline void multi_consumer_pub_sub_test(bool intra_process)
     {
       counter.fetch_add(1);
       printf("callback() %d with message data %u\n", counter.load(), msg->data);
-      ASSERT_EQ(intra_process, info.get_rmw_message_info().from_intra_process);
+      if (test_rclcpp::rcl_broker_enabled()) {
+        ASSERT_TRUE(info.get_rmw_message_info().from_intra_process);
+      } else {
+        ASSERT_EQ(intra_process, info.get_rmw_message_info().from_intra_process);
+      }
     };
 
   // Try to saturate the MultithreadedExecutor's thread pool with subscriptions
