@@ -21,7 +21,6 @@
 #include "rclcpp/rclcpp.hpp"
 
 #include "test_rclcpp/msg/u_int32.hpp"
-#include "test_rclcpp/rcl_broker.hpp"
 #include "test_rclcpp/utils.hpp"
 
 #include "./pub_sub_fixtures.hpp"
@@ -52,11 +51,7 @@ TEST_F(test_avoid_ros_namespace_conventions_qos, pub_sub_works)
     {
       ++counter;
       printf("  callback() %d with message data %u\n", counter, msg->data);
-      if (test_rclcpp::rcl_broker_enabled()) {
-        ASSERT_TRUE(info.get_rmw_message_info().from_intra_process);
-      } else {
-        ASSERT_FALSE(info.get_rmw_message_info().from_intra_process);
-      }
+      ASSERT_FALSE(info.get_rmw_message_info().from_intra_process);
     };
   auto qos = rclcpp::QoS(rclcpp::KeepLast(10)).avoid_ros_namespace_conventions(true);
   auto create_subscription_func =
