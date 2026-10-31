@@ -5,7 +5,7 @@
   <version>0.20.4</version>
   <description>
     Test the features of the ROS 2 Jazzy overhaul: the rcl broker, the rcl_executor core,
-    subscription loans, the rclpy executor additions and ros2topic hz and bw.
+    the rclpy executor additions and ros2topic hz and bw.
     Each test is run with every available rmw implementation where the feature applies.
   </description>
 

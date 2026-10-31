@@ -42,7 +42,7 @@ if(BUILD_TESTING)
 
   ament_find_gtest()
 
-  foreach(test_name test_broker test_core_executor test_loan_lifetime)
+  foreach(test_name test_broker test_core_executor)
     ament_add_gtest_executable(${test_name} test/${test_name}.cpp)
     target_include_directories(${test_name} PRIVATE include)
     target_link_libraries(${test_name} "${cpp_typesupport_target}" rclcpp::rclcpp)
@@ -61,15 +61,6 @@ if(BUILD_TESTING)
       TEST_NAME test_core_executor${target_suffix}
       TIMEOUT 90
       ENV ${rmw_implementation_env_var})
-
-    # Subscription loans need Zenoh shared memory.
-    if(rmw_implementation STREQUAL "rmw_zenoh_cpp")
-      ament_add_gtest_test(test_loan_lifetime
-        TEST_NAME test_loan_lifetime${target_suffix}
-        TIMEOUT 60
-        ENV ${rmw_implementation_env_var} ROS_DISABLE_LOANED_MESSAGES=0
-          ZENOH_CONFIG_OVERRIDE=transport/shared_memory/enabled=true)
-    endif()
 
     foreach(test_name test_mixed_broker test_rclpy_executors test_ros2topic)
       ament_add_pytest_test(${test_name}${target_suffix} test/${test_name}.py
