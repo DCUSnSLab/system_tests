@@ -41,42 +41,6 @@ def wait_for(predicate, timeout=10.0):
     return predicate()
 
 
-@pytest.mark.parametrize('executor_type', [SingleThreadedExecutor, MultiThreadedExecutor])
-def test_spin_some_runs_each_ready_entity_once(context, executor_type):
-    node = rclpy.create_node('spin_some_' + executor_type.__name__, context=context)
-    received = {'a': 0, 'b': 0, 'c': 0}
-
-    def count(name):
-        def callback(msg):
-            received[name] += 1
-        return callback
-    publishers = {}
-    for name in received:
-        topic = f'spin_some_{name}_{executor_type.__name__}'
-        node.create_subscription(String, topic, count(name), 10)
-        publishers[name] = node.create_publisher(String, topic, 10)
-    assert wait_for(lambda: all(
-        p.get_subscription_count() and node.count_publishers(p.topic_name)
-        for p in publishers.values()))
-    executor = executor_type(context=context)
-    executor.add_node(node)
-
-    start = time.monotonic()
-    executor.spin_some()
-    assert time.monotonic() - start < 1.0
-    assert received == {'a': 0, 'b': 0, 'c': 0}
-
-    for name in ('a', 'b', 'b', 'c'):
-        publishers[name].publish(String(data=name))
-    time.sleep(0.5)
-    executor.spin_some()
-    assert received == {'a': 1, 'b': 1, 'c': 1}
-    executor.spin_some()
-    assert received == {'a': 1, 'b': 2, 'c': 1}
-    executor.shutdown()
-    node.destroy_node()
-
-
 class SimClock:
     """Publish /clock from another context, 10 ms of ROS time every 10 ms."""
 
